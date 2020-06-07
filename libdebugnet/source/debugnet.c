@@ -1,25 +1,25 @@
 /*
  *	debugnet library for PSP2 
  *	Copyright (C) 2010,2015 Antonio Jose Ramos Marquez (aka bigboss) @psxdev on twitter
- *  Repository https://github.com/psxdev/debugnet
+ *	Copyright (C) 2020 Sergio Padrino Recio (aka sergiou87)
+ *  Repository https://github.com/sergiou87/ps3debugnet
  */
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <psp2/net/net.h>
-#include <psp2/net/netctl.h>
-#include <psp2/types.h>
-#include <psp2/kernel/clib.h>
-#include <psp2/sysmodule.h>
+#include <net/net.h>
+#include <net/netctl.h>
+#include <sysmodule/sysmodule.h>
+
 #include "debugnet.h"
 
 int debugnet_external_conf=0;
 debugNetConfiguration *dconfig=NULL;
 static void *net_memory = NULL;
-static SceNetInAddr vita_addr;
-struct SceNetSockaddrIn stSockAddr;
+//static struct in_addr vita_addr;
+struct sockaddr_in stSockAddr;
 
 
 /**
@@ -36,7 +36,7 @@ void debugNetUDPPrintf(const char* fmt, ...)
   char buffer[0x800];
   va_list arg;
   va_start(arg, fmt);
-  sceClibVsnprintf(buffer, sizeof(buffer), fmt, arg);
+  vsnprintf(buffer, sizeof(buffer), fmt, arg);
   va_end(arg);
   
   debugNetUDPSend(buffer);
@@ -55,7 +55,7 @@ void debugNetUDPPrintf(const char* fmt, ...)
  */
 void debugNetUDPSend(const char *text)
 {
-	sceNetSend(dconfig->SocketFD, text, strlen(text), 0);
+	send(dconfig->SocketFD, text, strlen(text), 0);
 }
 
 /**
@@ -78,7 +78,7 @@ void debugNetPrintf(int level, const char* format, ...)
        
 	va_start(args, format);
        
-	sceClibVsnprintf(msgbuf,2048, format, args);
+	vsnprintf(msgbuf,2048, format, args);
 	msgbuf[2047] = 0;
 	va_end(args);
 	if(level>dconfig->logLevel)
@@ -88,13 +88,13 @@ void debugNetPrintf(int level, const char* format, ...)
 	switch(level)
 	{
 		case INFO:
-	    	debugNetUDPPrintf("[VITA][INFO]: %s",msgbuf);  
+	    	debugNetUDPPrintf("[PS3][INFO]: %s",msgbuf);  
 	        break;
 	   	case ERROR: 
-	    	debugNetUDPPrintf("[VITA][ERROR]: %s",msgbuf);
+	    	debugNetUDPPrintf("[PS3][ERROR]: %s",msgbuf);
 	        break;
 		case DEBUG:
-	        debugNetUDPPrintf("[VITA][DEBUG]: %s",msgbuf);
+	        debugNetUDPPrintf("[PS3][DEBUG]: %s",msgbuf);
 	        break;
 		case NONE:
 			break;
@@ -135,9 +135,9 @@ void debugNetSetLogLevel(int level)
  */
 int debugNetInit(const char *serverIp, int port, int level)
 {
-    int ret=0;
-    SceNetInitParam initparam;
-    SceNetCtlInfo info;
+    //int ret=0;
+    //netInitParam initparam;
+    //union net_ctl_info info;
 	
 	if(debugNetCreateConf())
 	{
@@ -147,58 +147,58 @@ int debugNetInit(const char *serverIp, int port, int level)
 	debugNetSetLogLevel(level);
     
     
-	if (sceSysmoduleIsLoaded(SCE_SYSMODULE_NET) != SCE_SYSMODULE_LOADED)
-	ret=sceSysmoduleLoadModule(SCE_SYSMODULE_NET);
+	// if (sceSysmoduleIsLoaded(SCE_SYSMODULE_NET) != SCE_SYSMODULE_LOADED)
+	// ret=sceSysmoduleLoadModule(SCE_SYSMODULE_NET);
 	
-	if (ret >=0) {
+	// if (ret >=0) {
 		
 	
     /*net initialazation code from xerpi at https://github.com/xerpi/FTPVita/blob/master/ftp.c*/
     /* Init Net */
-    if (sceNetShowNetstat() == SCE_NET_ERROR_ENOTINIT) {
-        net_memory = malloc(NET_INIT_SIZE);
+    // if (sceNetShowNetstat() == SCE_NET_ERROR_ENOTINIT) {
+    //     net_memory = malloc(NET_INIT_SIZE);
 
-        initparam.memory = net_memory;
-        initparam.size = NET_INIT_SIZE;
-        initparam.flags = 0;
+    //     initparam.memory = net_memory;
+    //     initparam.size = NET_INIT_SIZE;
+    //     initparam.flags = 0;
 
-        ret = sceNetInit(&initparam);
-        //printf("sceNetInit(): 0x%08X\n", ret);
-    } else {
-        //printf("Net is already initialized.\n");
-    }
+    //     ret = sceNetInit(&initparam);
+    //     //printf("sceNetInit(): 0x%08X\n", ret);
+    // } else {
+    //     //printf("Net is already initialized.\n");
+    // }
 
     /* Init NetCtl */
-    ret = sceNetCtlInit();
+    // ret = sceNetCtlInit();
     //printf("sceNetCtlInit(): 0x%08X\n", ret);
    
 
     /* Get IP address */
-    ret = sceNetCtlInetGetInfo(SCE_NETCTL_INFO_GET_IP_ADDRESS, &info);
+    // ret = sceNetCtlInetGetInfo(SCE_NETCTL_INFO_GET_IP_ADDRESS, &info);
     //printf("sceNetCtlInetGetInfo(): 0x%08X\n", ret);
 
 
     /* Save the IP of PSVita to a global variable */
-    sceNetInetPton(SCE_NET_AF_INET, info.ip_address, &vita_addr);
+    // sceNetInetPton(SCE_NET_AF_INET, info.ip_address, &vita_addr);
 	
 	/* Create datagram udp socket*/
-    dconfig->SocketFD = sceNetSocket("debugnet_socket",
-        SCE_NET_AF_INET , SCE_NET_SOCK_DGRAM, SCE_NET_IPPROTO_UDP);
+    dconfig->SocketFD = socket(AF_INET , SOCK_DGRAM, IPPROTO_UDP);
    
     memset(&stSockAddr, 0, sizeof stSockAddr);
 	
 	
 	/*Populate SceNetSockaddrIn structure values*/
-    stSockAddr.sin_family = SCE_NET_AF_INET;
-    stSockAddr.sin_port = sceNetHtons(port);
-	sceNetInetPton(SCE_NET_AF_INET, serverIp, &stSockAddr.sin_addr);
+    stSockAddr.sin_family = AF_INET;
+    stSockAddr.sin_port = htons(port);
+	inet_pton(AF_INET, serverIp, &stSockAddr.sin_addr);
 
 	/*Connect socket to server*/
-    sceNetConnect(dconfig->SocketFD, (struct SceNetSockaddr *)&stSockAddr, sizeof stSockAddr);
+    connect(dconfig->SocketFD, (struct sockaddr *)&stSockAddr, sizeof stSockAddr);
 
 	/*Show log on pc/mac side*/
 	debugNetUDPPrintf("debugnet initialized\n");
 	debugNetUDPPrintf("Copyright (C) 2010,2015 Antonio Jose Ramos Marquez aka bigboss @psxdev\n");
+	debugNetUDPPrintf("Copyright (C) 2020 Sergio Padrino Recio aka sergiou87\n");
 	debugNetUDPPrintf("This Program is subject to the terms of the Mozilla Public\n"
 		"License, v. 2.0. If a copy of the MPL was not distributed with this\n"
 		"file, You can obtain one at http://mozilla.org/MPL/2.0/.\n");
@@ -206,7 +206,7 @@ int debugNetInit(const char *serverIp, int port, int level)
 
 	/*library debugnet initialized*/
     dconfig->debugnet_initialized = 1;
-	}
+	// }
 
     return dconfig->debugnet_initialized;
 }

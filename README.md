@@ -1,10 +1,10 @@
-DEBUGNET FOR VITA
+DEBUGNET FOR PS3
 =================
  
  What does this do?
 ===================
  
-  debugnet is a vita small library to debug your homebrew code over udp. It is the same method that i use to debug PlayStation 3 code, so i can use the same host tools for PlayStation Vita and PlayStation 3 to do it.
+  debugnet is a PS3 small library to debug your homebrew code over udp, it's based on debugnet for [PS Vita from bigboss](https://github.com/psxdev/debugnet).
   
   How do I use it?
 ==================
@@ -15,16 +15,6 @@ DEBUGNET FOR VITA
   ```
   cd libdebugnet
   make
-  make install
-  ```
-  
-  or
-  
-  ```
-  mkdir build
-  cd build
-  cmake ..
-  make 
   make install
   ```
   
@@ -43,39 +33,30 @@ DEBUGNET FOR VITA
   socat udp-recv:18194 stdout 
   ```
   
- 4) Install debugnetsample.vpk in your vita an run it
+ 4) Run debugnetsample.elf in your PS3 using ps3load and `make run`
  
- You will see in socat terminal window output from your PlayStation Vita:
+ You will see in socat terminal window output from your PlayStation 3:
  
  ```
  debugnet initialized
  Copyright (C) 2010,2015 Antonio Jose Ramos Marquez aka bigboss @psxdev
+ Copyright (C) 2020 Sergio Padrino Recio aka sergiou87
  This Program is subject to the terms of the Mozilla Public
  License, v. 2.0. If a copy of the MPL was not distributed with this
  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  ready to have a lot of fun...
- [VITA][DEBUG]: Test debug level 1
- [VITA][ERROR]: Test error level 1
- [VITA][INFO]: Test info level 1
+ [PS3][DEBUG]: Test debug level 1
+ [PS3][ERROR]: Test error level 1
+ [PS3][INFO]: Test info level 1
  ```
  
- 5) ready to have a lot of fun :P and switch done to henkaku and vitasdk
+ 5) ready to have a lot of fun :P
 
-
-  Change log
-===========================
- - 24/03/2017 Cmake added by devnoname120 
- - 04/09/2016 Update to support henkaku and last vitasdk
- - 21/01/2016 Update to support last vitasdk 
- 
 
   Credits
 ===========================
   
   Special thanks goes to:
   
-  - team molecule for bring henkaku to make life easier for homebrew developer 
-  - All people who collaborated in #PSP2SDK: @173210, @xerpi(i stole you network initialization code :P from FTPVita), @frangar , @frtomtomdu80, @hykemthedemon , @SMOKE587, @Josh_Axey ... 
-  - All ps3dev and ps2dev old comrades
-  - xyzz for help with vita toolchain
+  - bigboss for doing debugnet for vita, and everyone else who made that possible
   
