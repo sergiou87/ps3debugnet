@@ -108,8 +108,8 @@ clean:
 
 #---------------------------------------------------------------------------------
 install: $(OUTPUT).a
-	@cp $(OUTPUT).a $(PSL1GHT)/portlibs/ppu/lib
-	@cp include/debugnet.h $(PSL1GHT)/portlibs/ppu/include
+	@cp $(OUTPUT).a $(PS3DEV)/portlibs/ppu/lib
+	@cp include/debugnet.h $(PS3DEV)/portlibs/ppu/include
 	@echo "Installed!"
 
 #---------------------------------------------------------------------------------
